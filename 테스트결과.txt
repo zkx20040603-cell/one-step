@@ -1,0 +1,2 @@
+PASS: 11 assertions: week boundaries, year boundary, filters, invalid dates, record validation, empty progress, failed-save preservation.
+PASS: 17 assertions: reproducible read failure + retry, loading, input accessibility, add, write failure + retry, corrupted storage protection.
