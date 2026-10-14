@@ -1,0 +1,8 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+let source=fs.readFileSync(require('path').join(__dirname,'script.js'),'utf8');source=source.slice(0,source.indexOf("$('new-task').onclick"));
+const els={};const element=()=>({textContent:'',value:0,replaceChildren(){},setAttribute(){},append(){}});const context={Date,Intl,console,URLSearchParams,location:{search:''},document:{getElementById:id=>els[id]??=element(),createElement:()=>element()},localStorage:{setItem(k,v){this.value=v}},crypto:{}};vm.createContext(context);vm.runInContext(source,context);
+const check=s=>vm.runInContext(s,context);
+assert.equal(check("JSON.stringify(weekBounds(new Date(2026,9,18)))"),'["2026-10-12","2026-10-18"]');assert.equal(check("JSON.stringify(weekBounds(new Date(2026,9,19)))"),'["2026-10-19","2026-10-25"]');assert.equal(check("JSON.stringify(weekBounds(new Date(2027,0,1)))"),'["2026-12-28","2027-01-03"]');
+assert(check("inView({date:'2026-10-14'},'today','2026-10-14',['2026-10-12','2026-10-18'])"));assert(!check("inView({date:'2026-10-19'},'week','2026-10-14',['2026-10-12','2026-10-18'])"));assert(!check("validDate('2026-02-30')"));assert(check("validDate('2028-02-29')"));assert(!check("validTask({})"));
+check("render()");assert.equal(els.percent.textContent,0);check("storageReady=true;tasks=[{id:'1',title:'test',date:'2026-10-14',category:'공부',done:false}];localStorage.setItem=()=>{throw Error('quota')}");assert.equal(check("commit([], 'test')"),false);assert.equal(check('tasks.length'),1);assert(els['storage-error'].textContent.includes('저장하지 못했습니다'));
+console.log('PASS: 11 assertions: week boundaries, year boundary, filters, invalid dates, record validation, empty progress, failed-save preservation.');
